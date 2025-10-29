@@ -3,7 +3,7 @@
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix ifc:  <https://standards.buildingsmart.org/ifc/IFC4#> .
-@prefix ex:   <http://yutian-research.org/buildingRegulations#> .
+@prefix ex:   <http://https://github.com/Yutian0425/BuildingRegulations-Ontology/blob/main/buildingRegulations_ex.ttl#> .
 
 ##################################################################
 # 建筑法规语义模型 (Yutian Yi, 2025)
