@@ -1,0 +1,135 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix ifc:  <https://standards.buildingsmart.org/ifc/IFC4#> .
+@prefix yt:   <https://github.com/Yutian0425/BuildingRegulations-Ontology/blob/main/buildingRegulations_yt.ttl#> .
+
+# Building Regulations Semantic Model (Yutian Yi, 2025)
+# Purpose: Define the building space classes, component classes, and their properties
+# involved in the 12 regulatory clauses from China Residential Code, 2025 Edition.
+
+yt:Storey a rdfs:Class ;
+    rdfs:label "Building storey"@en ;
+    rdfs:subClassOf ifc:IfcBuildingStorey .
+
+yt:Bedroom a rdfs:Class ;
+    rdfs:label "Bedroom"@en ;
+    rdfs:subClassOf ifc:IfcSpace .
+
+yt:LivingRoom a rdfs:Class ;
+    rdfs:label "Living room"@en ;
+    rdfs:subClassOf ifc:IfcSpace .
+
+yt:Kitchen a rdfs:Class ;
+    rdfs:label "Kitchen"@en ;
+    rdfs:subClassOf ifc:IfcSpace .
+
+yt:Bathroom a rdfs:Class ;
+    rdfs:label "Bathroom"@en ;
+    rdfs:subClassOf ifc:IfcSpace .
+
+yt:Corridor a rdfs:Class ;
+    rdfs:label "In-unit corridor"@en ;
+    rdfs:subClassOf ifc:IfcSpace .
+
+yt:SlopedRoom a rdfs:Class ;
+    rdfs:label "Sloped-roof room"@en ;
+    rdfs:subClassOf yt:Bedroom .
+
+yt:EntranceDoor a rdfs:Class ;
+    rdfs:label "Entrance door"@en ;
+    rdfs:subClassOf ifc:IfcDoor .
+
+yt:BedroomDoor a rdfs:Class ;
+    rdfs:label "Bedroom door"@en ;
+    rdfs:subClassOf ifc:IfcDoor .
+
+yt:KitchenDoor a rdfs:Class ;
+    rdfs:label "Kitchen door"@en ;
+    rdfs:subClassOf ifc:IfcDoor .
+
+yt:BathroomDoor a rdfs:Class ;
+    rdfs:label "Bathroom door"@en ;
+    rdfs:subClassOf ifc:IfcDoor .
+
+yt:BalconyRailing a rdfs:Class ;
+    rdfs:label "Balcony railing"@en ;
+    rdfs:subClassOf ifc:IfcRailing .
+
+
+# Property definitions (aligned with IFC properties)
+
+
+yt:usableArea a rdf:Property ;
+    rdfs:label "Usable area"@en ;
+    rdfs:domain yt:Bedroom, yt:Kitchen, yt:LivingRoom ;
+    rdfs:range xsd:decimal ;
+    owl:equivalentProperty ifc:GrossFloorArea .
+
+yt:shorterSideNetWidth a rdf:Property ;
+    rdfs:label "Shortest-side net width"@en ;
+    rdfs:domain yt:Bedroom ;
+    rdfs:range xsd:decimal .
+
+yt:storeyHeight a rdf:Property ;
+    rdfs:label "Storey height"@en ;
+    rdfs:domain yt:Storey ;
+    rdfs:range xsd:decimal ;
+    owl:equivalentProperty ifc:Height .
+
+yt:netHeight a rdf:Property ;
+    rdfs:label "Net indoor height"@en ;
+    rdfs:domain yt:Bedroom, yt:LivingRoom, yt:Kitchen, yt:Bathroom ;
+    rdfs:range xsd:decimal ;
+    owl:equivalentProperty ifc:Height .
+
+yt:localMinNetHeight a rdf:Property ;
+    rdfs:label "Local minimum net height"@en ;
+    rdfs:domain yt:Bedroom, yt:LivingRoom ;
+    rdfs:range xsd:decimal .
+
+yt:areaBelow2_6 a rdf:Property ;
+    rdfs:label "Area below 2.6 m"@en ;
+    rdfs:domain yt:Bedroom, yt:LivingRoom ;
+    rdfs:range xsd:decimal .
+
+yt:areaAbove2_2 a rdf:Property ;
+    rdfs:label "Area above 2.2 m"@en ;
+    rdfs:domain yt:SlopedRoom ;
+    rdfs:range xsd:decimal .
+
+yt:floorDrainSlope a rdf:Property ;
+    rdfs:label "Floor drain slope"@en ;
+    rdfs:domain yt:Bathroom ;
+    rdfs:range xsd:decimal .
+
+yt:thresholdDeltaHeight a rdf:Property ;
+    rdfs:label "Threshold height difference"@en ;
+    rdfs:domain yt:EntranceDoor ;
+    rdfs:range xsd:decimal .
+
+yt:netWidth a rdf:Property ;
+    rdfs:label "Net width"@en ;
+    rdfs:domain yt:Corridor ;
+    rdfs:range xsd:decimal ;
+    owl:equivalentProperty ifc:Width .
+
+yt:clearWidth a rdf:Property ;
+    rdfs:label "Clear width"@en ;
+    rdfs:domain yt:EntranceDoor, yt:BedroomDoor, yt:KitchenDoor, yt:BathroomDoor ;
+    rdfs:range xsd:decimal ;
+    owl:equivalentProperty ifc:ClearWidth .
+
+yt:railingNetHeight a rdf:Property ;
+    rdfs:label "Railing net height"@en ;
+    rdfs:domain yt:BalconyRailing ;
+    rdfs:range xsd:decimal ;
+    owl:equivalentProperty ifc:Height .
+
+# Additional description (optional extension)
+
+
+yt:BuildingRegulationModel a owl:Ontology ;
+    rdfs:label "Building regulations semantic model (Yutian Yi)"@en ;
+    rdfs:comment "Defines the semantic classes and properties required for residential building regulation checking, supporting SHACL rule validation and integration with Revit data."@en .
