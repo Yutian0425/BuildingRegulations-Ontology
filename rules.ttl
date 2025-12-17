@@ -1,0 +1,223 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ifc:  <https://standards.buildingsmart.org/ifc/IFC4#> .
+@prefix yt:   <https://github.com/Yutian0425/BuildingRegulations-Ontology/blob/main/buildingRegulations_yt.ttl#> .
+
+
+# Agreed data model (example)
+#  - yt:Bedroom / yt:LivingRoom / yt:Kitchen / yt:Bathroom / yt:Corridor / yt:Storey
+#  - yt:EntranceDoor / yt:BedroomDoor / yt:KitchenDoor / yt:BathroomDoor / yt:BalconyRailing
+#  - Common properties: yt:usableArea, yt:shorterSideNetWidth, yt:storeyHeight, yt:netHeight,
+#             yt:localMinNetHeight, yt:areaBelow2_6, yt:areaAbove2_2, yt:floorDrainSlope,
+#             yt:thresholdDeltaHeight, yt:netWidth, yt:clearWidth, yt:railingNetHeight
+
+# 1. Bedroom usable area ≥ 5 m²
+yt:BedroomAreaShape a sh:NodeShape ;
+  sh:targetClass yt:Bedroom ;
+  sh:property [
+    sh:path yt:usableArea ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 5.0 ;
+    sh:message "Bedroom usable area shall be not less than 5 m²." ;
+  ] .
+
+# 2. Bedroom shortest-side net width ≥ 1.80 m 
+yt:BedroomMinWidthShape a sh:NodeShape ;
+  sh:targetClass yt:Bedroom ;
+  sh:property [
+    sh:path yt:shorterSideNetWidth ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 1.80 ;
+    sh:message "Bedroom shortest-side net width shall be not less than 1.80 m." ;
+  ] .
+
+# 3. Storey height ≥ 3.00 m
+yt:StoreyHeightShape a sh:NodeShape ;
+  sh:targetClass yt:Storey ;
+  sh:property [
+    sh:path yt:storeyHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 3.00 ;
+    sh:message "Building storey height shall be not less than 3.00 m." ;
+  ] .
+
+# 4. Net height requirements for bedroom/living room 
+# 4.1 Net indoor height ≥ 2.60 m
+yt:RoomNetHeightShape a sh:NodeShape ;
+  sh:targetClass yt:LivingRoom ;
+  sh:property [
+    sh:path yt:netHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 2.60 ;
+    sh:message "Living room net indoor height shall be not less than 2.60 m." ;
+  ] .
+yt:BedroomNetHeightShape a sh:NodeShape ;
+  sh:targetClass yt:Bedroom ;
+  sh:property [
+    sh:path yt:netHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 2.60 ;
+    sh:message "Bedroom net indoor height shall be not less than 2.60 m." ;
+  ] .
+
+# 4.2 Local minimum net height ≥ 2.20 m
+yt:RoomLocalMinHeightShape a sh:NodeShape ;
+  sh:targetClass yt:LivingRoom ;
+  sh:property [
+    sh:path yt:localMinNetHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 2.20 ;
+    sh:message "Living room local minimum net height shall be not less than 2.20 m." ;
+  ] .
+yt:BedroomLocalMinHeightShape a sh:NodeShape ;
+  sh:targetClass yt:Bedroom ;
+  sh:property [
+    sh:path yt:localMinNetHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 2.20 ;
+    sh:message "Bedroom local minimum net height shall be not less than 2.20 m." ;
+  ] .
+
+# 4.3 Area below 2.60 m ≤ 1/3 of usable area (SPARQL constraint)
+yt:RoomLowHeightAreaRatioShape a sh:NodeShape ;
+  sh:targetClass yt:LivingRoom ;
+  sh:sparql [
+    sh:message "For a living room, the area below 2.60 m shall be no greater than one-third of the usable area." ;
+    sh:select """
+      SELECT ?this WHERE {
+        ?this yt:usableArea ?area .
+        ?this yt:areaBelow2_6 ?lowArea .
+        FILTER (?lowArea > (?area / 3.0))
+      }
+    """ ;
+  ] .
+yt:BedroomLowHeightAreaRatioShape a sh:NodeShape ;
+  sh:targetClass yt:Bedroom ;
+  sh:sparql [
+    sh:message "For a bedroom, the area below 2.60 m shall be no greater than one-third of the usable area." ;
+    sh:select """
+      SELECT ?this WHERE {
+        ?this yt:usableArea ?area .
+        ?this yt:areaBelow2_6 ?lowArea .
+        FILTER (?lowArea > (?area / 3.0))
+      }
+    """ ;
+  ] .
+
+# 5. Sloped-roof space: area with net height ≥ 2.20 m ≥ 1/2 of usable area 
+yt:SlopedRoomAreaShape a sh:NodeShape ;
+  sh:targetClass yt:SlopedRoom ;  # Assigned on the data side for bedrooms/living rooms under sloped roofs
+  sh:sparql [
+    sh:message "For a sloped-roof room, the area with net height ≥ 2.20 m shall be not less than one-half of the usable area." ;
+    sh:select """
+      SELECT ?this WHERE {
+        ?this yt:usableArea ?area .
+        ?this yt:areaAbove2_2 ?highArea .
+        FILTER (?highArea < (?area / 2.0))
+      }
+    """ ;
+  ] .
+
+# 6. Kitchen and bathroom net height ≥ 2.20 m 
+yt:KitchenHeightShape a sh:NodeShape ;
+  sh:targetClass yt:Kitchen ;
+  sh:property [
+    sh:path yt:netHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 2.20 ;
+    sh:message "Kitchen net indoor height shall be not less than 2.20 m." ;
+  ] .
+yt:BathroomHeightShape a sh:NodeShape ;
+  sh:targetClass yt:Bathroom ;
+  sh:property [
+    sh:path yt:netHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 2.20 ;
+    sh:message "Bathroom net indoor height shall be not less than 2.20 m." ;
+  ] .
+
+# 7. Kitchen area ≥ 3.5 m² 
+yt:KitchenAreaShape a sh:NodeShape ;
+  sh:targetClass yt:Kitchen ;
+  sh:property [
+    sh:path yt:usableArea ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 3.5 ;
+    sh:message "Kitchen area shall be not less than 3.5 m²." ;
+  ] .
+
+# 8. Bathroom floor drain slope ≥ 1%
+yt:BathroomSlopeShape a sh:NodeShape ;
+  sh:targetClass yt:Bathroom ;
+  sh:property [
+    sh:path yt:floorDrainSlope ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.01 ;
+    sh:message "Bathroom floor drain slope shall be not less than 1% (0.01)." ;
+  ] .
+
+# 9. Entrance door threshold height difference ≤ 0.015 m 
+yt:EntranceDoorThresholdShape a sh:NodeShape ;
+  sh:targetClass yt:EntranceDoor ;
+  sh:property [
+    sh:path yt:thresholdDeltaHeight ;
+    sh:datatype xsd:decimal ;
+    sh:maxInclusive 0.015 ;
+    sh:message "Entrance door threshold height difference shall not exceed 0.015 m." ;
+  ] .
+
+# 10. In-unit corridor net width ≥ 0.90 m 
+yt:CorridorWidthShape a sh:NodeShape ;
+  sh:targetClass yt:Corridor ;
+  sh:property [
+    sh:path yt:netWidth ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.90 ;
+    sh:message "In-unit corridor net width shall be not less than 0.90 m." ;
+  ] .
+
+# 11. Door clear width requirements 
+yt:EntranceDoorWidthShape a sh:NodeShape ;
+  sh:targetClass yt:EntranceDoor ;
+  sh:property [
+    sh:path yt:clearWidth ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.90 ;
+    sh:message "Entrance door clear width shall be not less than 0.90 m." ;
+  ] .
+yt:BedroomDoorWidthShape a sh:NodeShape ;
+  sh:targetClass yt:BedroomDoor ;
+  sh:property [
+    sh:path yt:clearWidth ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.80 ;
+    sh:message "Bedroom door clear width shall be not less than 0.80 m." ;
+  ] .
+yt:KitchenDoorWidthShape a sh:NodeShape ;
+  sh:targetClass yt:KitchenDoor ;
+  sh:property [
+    sh:path yt:clearWidth ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.70 ;
+    sh:message "Kitchen door clear width shall be not less than 0.70 m." ;
+  ] .
+yt:BathroomDoorWidthShape a sh:NodeShape ;
+  sh:targetClass yt:BathroomDoor ;
+  sh:property [
+    sh:path yt:clearWidth ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.70 ;
+    sh:message "Bathroom door clear width shall be not less than 0.70 m." ;
+  ] .
+
+# 12. Balcony railing net height ≥ 1.20 m
+yt:BalconyRailingHeightShape a sh:NodeShape ;
+  sh:targetClass yt:BalconyRailing ;
+  sh:property [
+    sh:path yt:railingNetHeight ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 1.20 ;
+    sh:message "Balcony railing net height shall be not less than 1.20 m." ;
+  ] .
